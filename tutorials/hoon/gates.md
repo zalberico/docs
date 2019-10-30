@@ -172,7 +172,7 @@ Write a gate that takes an atom, `a=@`, and which returns double the value of `a
 
 ### Exercise 1.4.1b
 
-Write a generator that takes an atom, `a=@`, and which returns triple the value of `a` if `a` is less than 50, and which subtracts 25 when `a` is greater than or equal to 50. Note that `sub` allows you to subtract two numbers, e.g.
+Write a gate that takes an atom, `a=@`, and which returns triple the value of `a` if `a` is less than 50, and which subtracts 25 when `a` is greater than or equal to 50. Note that `sub` allows you to subtract two numbers, e.g.
 ```
 > (sub 50 25)
 25
@@ -278,20 +278,12 @@ Before finishing the lesson let's unbind `ten`:
 
 ## Exercise 1.4.1b Solution
 
-```hoon
-:: bweh.hoon
-::
-|=  a=@
-?:  (lth a 50)
-    (mul a 3)
-(sub a 25)
 ```
-
-```
-> +bweh 5
+> =bweh |=(a=@ ?:((lth a 50) (mul a 3) (sub a 25)))
+> (bweh 5)
 15
-> +bweh 51
+> (bweh 51)
 26
-> +bweh 510
+> (bweh 510)
 485
 ```
