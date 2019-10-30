@@ -170,6 +170,14 @@ This is exactly the default dojo subject, from before we put `inc` into the subj
 
 Write a gate that takes an atom, `a=@`, and which returns double the value of `a`.  Bind this gate to `double` and test it in the dojo.  A solution is given at the end of this lesson.
 
+### Exercise 1.4.1b
+
+Write a generator that takes an atom, `a=@`, and which returns triple the value of `a` if `a` is less than 50, and which subtracts 25 when `a` is greater than or equal to 50. Note that `sub` allows you to subtract two numbers, e.g.
+```
+> (sub 50 25)
+25
+```
+
 ## Gates Define Functions of the Sample
 
 The value of a function's output depends solely upon the input value.  This is one of the features that make functions desirable in many programming contexts.  It's worth going over how Hoon function calls implement this feature.
@@ -258,8 +266,6 @@ Before finishing the lesson let's unbind `ten`:
 
 ## Exercise 1.4.1a Solution
 
-Write a gate that takes an atom, `a=@`, and which returns double the value of `a`.  Bind this gate to `double` and test it in the dojo.
-
 ```
 > =double |=(a=@ (mul 2 a))
 
@@ -268,4 +274,24 @@ Write a gate that takes an atom, `a=@`, and which returns double the value of `a
 
 > (double 25)
 50
+```
+
+## Exercise 1.4.1b Solution
+
+```hoon
+:: bweh.hoon
+::
+|=  a=@
+?:  (lth a 50)
+    (mul a 3)
+(sub a 25)
+```
+
+```
+> +bweh 5
+15
+> +bweh 51
+26
+> +bweh 510
+485
 ```
