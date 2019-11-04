@@ -4,12 +4,7 @@ weight = 12
 template = "doc.html"
 aliases = ["docs/reference/hoon-expressions/rune/buc/"]
 +++
-The `$` family of runes is used for defining custom types.  Strictly speaking,
-these runes are used to produce 'structures'.  A structure is a compile-time
-value that at runtime can be converted to either an example value (sometimes
-called a 'bunt' value) for its corresponding type, or to a 'factory' (sometimes
-called a 'mold').  An example value is used as a placeholder for sample values,
-among other things.  A factory/mold is used as a data validator.
+The `$` family of runes is used for defining custom types.  Strictly speaking, these runes are used to produce 'structures'.  A structure is a compile-time value that at runtime can be converted to either an example value (sometimes called a 'bunt' value) for its corresponding type, or to a 'mold.  An example value is used as a placeholder for sample values among other things.  A mold is used as a data validator.
 
 ## Overview
 
