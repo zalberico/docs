@@ -391,3 +391,25 @@ normalizer.
 ~zod:dojo> $:a
 %baz
 ```
+
+### $> "bucgar"
+
+### $$ "bucbuc"
+
+### $| "bucbar"
+
+### $. "bucdot"
+
+### $< "bucgal"
+
+### $+ "buclus"
+
+### $+ "bucfas"
+
+### $; "bucmic"
+
+### $& "bucpam"
+
+### $` "buctic"
+
+### $! "buczap"
