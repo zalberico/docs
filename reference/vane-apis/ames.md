@@ -6,7 +6,8 @@ template = "doc.html"
 
 # Ames
 
-In this document we describe the public interface for Ames.
+In this document we describe the public interface for Ames.  Namely, we describe
+each `task` that Ames can be `pass`ed, and which `gift`(s) Behn can `give` in return.
 
 
 ## Tasks
@@ -34,21 +35,4 @@ In this document we describe the public interface for Ames.
 ### %vega
 
 ### %wegh
-
-
-## Gifts
-
-### %boon
-
-### %clog
-
-### %done
-
-### %lost
-
-### %mass
-
-### %send
-
-### %turf
 
