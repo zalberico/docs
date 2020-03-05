@@ -12,18 +12,19 @@ each `task` that Behn can be `pass`ed, and which `gift`(s) Behn can `give` in re
 
 ## Tasks
 
-### %born
+### `%born`
 
-Each time you start your Urbit, the Arvo kernel calls the `%born` task for Behn.
-
-#### Task
-
-`%born` is a [vane-task](@/docs/references/vane-apis/common-tasks.md) that takes
-in an empty card `[~]`. When
+Each time you start your Urbit, the Arvo kernel calls the `%born` task for Behn. When
 called, Behn gets the current time from Unix and updates its list of timers
 accordingly.
 
-#### Gift
+#### Accepts
+
+```hoon
+[~]
+```
+
+#### Returns
 
 `%born` does not return a `gift`.
 
@@ -38,25 +39,33 @@ accordingly.
 ### %crud
 
 `%crud` is called whenever an error involving Behn occurs, which for now means
-that it appears that Behn has no timers in its state. It takes in an error
-report and either returns that error report with additional information, or
-calls the `+wake` `task` with the error report as an argument.
+that it appears that Behn has no timers in its state.
 
-#### Task
-
-`%crud` is a [vane-task](@/docs/references/vane-apis/common-tasks.md) that takes
-in a card `[tag=@tas error=tang]`. Here, `tag` is a `@tas` denoting the
-type of error, and `error` is an error message. When
-called, it checks to see if the set of timers is empty. If so, it returns an
-error report containing `error`, otherwise it passes the error to `+wake`.
+When called, it checks to see if the set of timers is empty. If so, it prints
+and error report containing `error`, otherwise it passes the error to `+wake`.
 
 Behn should be the first vane to be activated in a `%wake`. Occasionally this does not
 happen, but we do not yet handle this error.
 
-#### Gift
+#### Accepts
+
+```hoon
+[tag=@tas error=tang]
+```
+Here, `tag` is a `@tas` denoting the type of error, and `error` is an error message.
+
+#### Returns
+
+Is calling the wake arm directly the same thing as Behn `%give`ing a `%wake`
+card to itself?
+
+If the set of timers is nonempty when Behn is `%pass`ed a `%crud` `task`, Behn
+`%give`s a `%wake` `card` to itself.
+
+```hoon
+[%wake %behn-crud-no-timer tag error]
+```
  
-If the set of timers is empty when Behn is `%pass`ed a `%crud` `task`, Behn `%give`s a `%wake` `card` given by
-`[%behn-crud-no-timer tag error]`.
 
 #### Source
 ```hoon
@@ -82,10 +91,7 @@ If the set of timers is empty when Behn is `%pass`ed a `%crud` `task`, Behn `%gi
 
 ### %drip
 
-`%drip` is utilized for event scheduling to ensure that they occur in the proper
-order.
-
-#### Task
+`%drip` is utilized to delay `%give`ing a `gift`.
 
 `%drip` allows one to delay `gift`s until a given condition is met. For example,
 if Clay crashes and you do not wish for an app to then crash when it tries to
@@ -95,9 +101,15 @@ been restored.
 `%drip` only handles `gift`s, and can only schedule `gift`s for as soon as
 possible after the prescribed condition is met.
 
+#### Accepts
+
+```hoon
+mov=vase
+```
+
 `%drip` takes in a `%give` `move` in a `vase`.
 
-#### Gift
+#### Returns
 
 In response to a `%drip` `task`, Behn will `%give` a `%meta` `gift` containing
 the `gift` originally `%give`n to Behn when `%drip` was first called.
@@ -126,9 +138,13 @@ a pass it passed itself, not the original event?
 
 ### %huck
 
-Gives back an input move.
+Immediately gives back an input move.
 
 #### Task
+
+```hoon
+mov=vase
+```
 
 Behn takes in a `move` contained in a `vase`.
 
