@@ -140,7 +140,7 @@ a pass it passed itself, not the original event?
 
 Immediately gives back an input move.
 
-#### Task
+#### Accepts
 
 ```hoon
 mov=vase
@@ -148,9 +148,15 @@ mov=vase
 
 Behn takes in a `move` contained in a `vase`.
 
-#### Gift
+#### Returns
+
+```hoon
+[%give %meta mov]
+```
 
 Behn returns the input `move` as a `%meta` `gift`.
+
+#### Source
 
 ```hoon
   ::  +huck: give back immediately
@@ -167,16 +173,24 @@ Behn returns the input `move` as a `%meta` `gift`.
 
 ### %rest
 
-Cancels a timer.
-
-#### Task
+Cancels a timer that was previously set.
 
 Behn takes in a `@da` and cancels the timer at that time if it exists, then
 adjusts the next wakeup call from Unix if necessary.
 
+#### Task
+
+```hoon
+@da
+```
+
+
 #### Gift
 
 This `task` returns no `gift`s.
+
+
+#### Source
 
 ```hoon
 ::  +rest: cancel the timer at :date, then adjust unix wakeup
@@ -188,14 +202,15 @@ This `task` returns no `gift`s.
 ### %trim
 
 This `task` is sent by the interpreter in order to free up memory.
+ This `task` is empty for Behn, since it is not a good idea to forget your timers.
 
-#### Task
+#### Accepts
 
-This `task` is empty, since it is not a good idea to forget your timers.
+This `task` has no arguments. 
 
-#### Gift
+#### Returns
 
-This `task` returns no `gift`s.
+This `task` returns `[moves state]`.
 
 #### Source
 
@@ -209,15 +224,16 @@ This `task` returns no `gift`s.
 
 ### %vega
 
-This `task` informs the vane that the kernel has been upgraded.
+This `task` informs the vane that the kernel has been upgraded. Behn does not do
+anything in response to this.
 
-#### Task
+#### Accepts
 
-This `task` has no arguments, and Behn does not do anything in response to a kernel upgrade.
+This `task` has no arguments.
 
-#### Gift
+#### Returns
 
-This `task` returns no `gift`s.
+This `task` returns `[moves state]`.
 
 #### Source
 
@@ -231,16 +247,19 @@ This `task` returns no `gift`s.
 
 ### %wait
 
-This `task` instructs Behn to start a new timer.
+This `task` takes in a `@da` which Behn then adds to `timers.state`, the list of timers.
 
-#### Task
+#### Accepts
 
-This `task` takes in a `@da` which Behn then adds to `timers.state`.
+```hoon
+@da
+```
  
-#### Gift
+#### Returns
 
-This `task` produces no `gift`s.
+This `task` returns nothing.
 
+#### Source
 
 ```hoon
 ::  +wait: set a new timer at :date, then adjust unix wakeup
@@ -252,19 +271,26 @@ This `task` produces no `gift`s.
 ### %wake
 
 This `task` is sent by the kernel when the Unix timer tells the kernel that it
-is time for Behn to wake up. It is also called by Behn to emit an error message.
-
-#### Task
-
+is time for Behn to wake up. It is also called by Behn to emit an error message. 
 Upon receiving this `task`, Behn processes the elapsed timer and then sets
 `:next-wake`.
 
-#### Gift
+#### Accepts
+
+```hoon
+error=(unit tang)
+```
+
+`%wake` is also used by Behn to emit error messages (why?) and so may have a
+`tang` as an input.
+
+#### Returns
 
 In response to receiving this `task`, Behn may `%give` a `%doze` `gift`
 containing the `@da` of the next timer to elapse. Behn may also `%give` a
 `%wake` `gift` to itself.
 
+#### Source
 
 ```hoon
   ::  +wake: unix says wake up; process the elapsed timer and set :next-wake
@@ -299,15 +325,24 @@ containing the `@da` of the next timer to elapse. Behn may also `%give` a
 
 This `task` asks Behn to product a memory usage report.
 
-#### Task
+#### Accepts
 
-This `task` has no input arguments.
+This `task` has no arguments.
 
-#### Gift
+#### Returns
+
+```hoon
+:_  state  :_  ~
+    :^  duct  %give  %mass
+    :+  %behn  %|
+    :~  timers+&+timers.state
+        dot+&+state
+```
 
 When Behn is `%pass`ed this `task`, it will `%give` a `%mass` `gift` in response
 containing Behn's current memory usage.
 
+#### Source
 
 ```hoon
   ::  +wegh: produce memory usage report for |mass
