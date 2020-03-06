@@ -16,49 +16,204 @@ system/lifecycle tasks.
 
 ### %hear
 
+`%hear` handles raw packet receipt. 
+
 #### Accepts
+
+This looks a bit heavy, gonna just ask about this instead of trying to tease it
+out myself.
+
+```hoon
+  ::  $lane: ship transport address; either opaque $address or galaxy
+  ::
+  ::    The runtime knows how to look up galaxies, so we don't need to
+  ::    know their transport addresses.
+  ::
+  +$  lane  (each @pC address)
+```
+
+```hoon
+  ++  blob                                              ::  fs blob
+    $%  {$delta p/lobe q/{p/mark q/lobe} r/page}        ::  delta on q
+        {$direct p/lobe q/page}                         ::  immediate
+    ==                                                  ::
+```
 
 #### Returns
 
 #### Source
 
+```hoon
+  ::  +on-hear: handle raw packet receipt
+  ::
+  ++  on-hear
+    |=  [=lane =blob]
+    ^+  event-core
+    (on-hear-packet lane (decode-packet blob) ok=%.y)
+```
 
 ### %heed
 
+A vane can pass Ames a `%heed` `task` to request Ames track a peer's
+responsiveness.  If our `%boon`s to it start backing up locally,
+Ames will give a `%clog` back to the requesting vane containing the
+unresponsive peer's Urbit address.  This interaction does not use
+ducts as unique keys.  Stop tracking a peer by sending Ames a
+`%jilt` `task`.
+
+
 #### Accepts
+
+```hoon
+=ship
+```
+
+The ship to be tracked.
 
 #### Returns
 
+The `+on-heed` arm returns `event-core` with `heeds` modified to include `ship`.
+(why does it look like heeds is a list of ducts then?)
+
 #### Source
+
+```hoon
+  ::  +on-heed: handle request to track .ship's responsiveness
+  ::
+  ++  on-heed
+    |=  =ship
+    ^+  event-core
+    =/  ship-state  (~(get by peers.ames-state) ship)
+    ?.  ?=([~ %known *] ship-state)
+      %+  enqueue-alien-todo  ship
+      |=  todos=alien-agenda
+      todos(heeds (~(put in heeds.todos) duct))
+    ::
+    =/  =peer-state  +.u.ship-state
+    =/  =channel     [[our ship] now channel-state -.peer-state]
+    abet:on-heed:(make-peer-core peer-state channel)
+```
 
 
 ### %hole
 
+`%hole` handles packet crash notification.
+
+Another one with lane and blob, ask about it.
+
 #### Accepts
 
 #### Returns
 
 #### Source
 
+```hoon
+  ::  +on-hole: handle packet crash notification
+  ::
+  ++  on-hole
+    |=  [=lane =blob]
+    ^+  event-core
+    (on-hear-packet lane (decode-packet blob) ok=%.n)
+```
 
 ### %jilt
 
+`%jilt` stops tracking a potentially unresponsive peer that was previously being
+tracked as a result of the `%heed` `task`.
+
 #### Accepts
+
+```hoon
+=ship
+```
+
+The `ship` we no longer wish to track.
 
 #### Returns
 
+`+on-jilt` returns `event-core` with `ship` removed from `heeds`, assuming it is
+there. Otherwise it returns `event-core` unchanged.
+
 #### Source
 
+```hoon
+  ::  +on-jilt: handle request to stop tracking .ship's responsiveness
+  ::
+  ++  on-jilt
+    |=  =ship
+    ^+  event-core
+    =/  ship-state  (~(get by peers.ames-state) ship)
+    ?.  ?=([~ %known *] ship-state)
+      %+  enqueue-alien-todo  ship
+      |=  todos=alien-agenda
+      todos(heeds (~(del in heeds.todos) duct))
+    ::
+    =/  =peer-state  +.u.ship-state
+    =/  =channel     [[our ship] now channel-state -.peer-state]
+    abet:on-jilt:(make-peer-core peer-state channel)
+```
 
 ### %plea
 
+`%plea` is the `task` used to send messages over Ames. It extends the
+`%pass`/`%give` semantics across the network. As such, it is the most
+fundamental `task` in Ames and the primary reason for its existence.
+
+Ames `pass`es a `%plea` `note` to another vane when it receives a message on a
+"forward flow" from a peer, originally passed from one of the peer's vanes to
+peer's Ames.
+
+Ames `pass`es a `%plea` to itself to trigger a heartbeat message to be sent to
+our ship's sponsor
+
 #### Accepts
+
+```hoon
+[=ship =plea]
+```
+
+A `%plea` `task` takes in the `ship` the `plea` is addressed to, and a `$plea`,
+which is
+
+```hoon
+  +$  plea  [vane=@tas =path payload=*]
+```
+Here, `vane` is the destination vane on the remote ship, `path` is the internal
+route on the receiving ship, and `payload` is the semantic message content.
 
 #### Returns
 
+`event-core` is returned, modified to...
+
 #### Source
 
-
+```hoon
+  ::  +on-plea: handle request to send message
+  ::
+  ++  on-plea
+    |=  [=ship =plea]
+    ^+  event-core
+    ::  .plea is from local vane to foreign ship
+    ::
+    =/  ship-state  (~(get by peers.ames-state) ship)
+    ::
+    ?.  ?=([~ %known *] ship-state)
+      %+  enqueue-alien-todo  ship
+      |=  todos=alien-agenda
+      todos(messages [[duct plea] messages.todos])
+    ::
+    =/  =peer-state  +.u.ship-state
+    =/  =channel     [[our ship] now channel-state -.peer-state]
+    ::
+    =^  =bone  ossuary.peer-state  (bind-duct ossuary.peer-state duct)
+    %-  %^  trace  msg.veb  ship
+        |.  ^-  tape
+        =/  sndr  [our our-life.channel]
+        =/  rcvr  [ship her-life.channel]
+        "plea {<sndr^rcvr^bone^vane.plea^path.plea>}"
+    ::
+    abet:(on-memo:(make-peer-core peer-state channel) bone plea %plea)
+```
 
 ## System and Lifecycle Tasks
 
