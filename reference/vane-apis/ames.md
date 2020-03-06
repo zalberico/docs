@@ -9,6 +9,7 @@ template = "doc.html"
 In this document we describe the public interface for Ames.  Namely, we describe
 each `task` that Ames can be `pass`ed, and which `gift`(s) Behn can `give` in return.
 
+
 ## Tasks
 
 ### %born
