@@ -36,7 +36,7 @@ accordingly.
 ```
 
 
-### %crud
+### `%crud`
 
 `%crud` is called whenever an error involving Behn occurs, which for now means
 that it appears that Behn has no timers in its state.
@@ -89,7 +89,7 @@ If the set of timers is nonempty when Behn is `%pass`ed a `%crud` `task`, Behn
  ```
  
 
-### %drip
+### `%drip`
 
 `%drip` is utilized to delay `%give`ing a `gift`.
 
@@ -136,7 +136,7 @@ a pass it passed itself, not the original event?
 
 
 
-### %huck
+### `%huck`
 
 Immediately gives back an input move.
 
@@ -171,7 +171,7 @@ Behn returns the input `move` as a `%meta` `gift`.
 
 
 
-### %rest
+### `%rest`
 
 Cancels a timer that was previously set.
 
@@ -199,7 +199,7 @@ This `task` returns no `gift`s.
 
 
 
-### %trim
+### `%trim`
 
 This `task` is sent by the interpreter in order to free up memory.
  This `task` is empty for Behn, since it is not a good idea to forget your timers.
@@ -222,7 +222,7 @@ This `task` returns `[moves state]`.
 
 
 
-### %vega
+### `%vega`
 
 This `task` informs the vane that the kernel has been upgraded. Behn does not do
 anything in response to this.
@@ -245,7 +245,7 @@ This `task` returns `[moves state]`.
 
 
 
-### %wait
+### `%wait`
 
 This `task` takes in a `@da` which Behn then adds to `timers.state`, the list of timers.
 
@@ -268,7 +268,7 @@ This `task` returns nothing.
 
 
 
-### %wake
+### `%wake`
 
 This `task` is sent by the kernel when the Unix timer tells the kernel that it
 is time for Behn to wake up. It is also called by Behn to emit an error message. 
@@ -321,7 +321,7 @@ containing the `@da` of the next timer to elapse. Behn may also `%give` a
 
 
 
-### %wegh
+### `%wegh`
 
 This `task` asks Behn to product a memory usage report.
 
