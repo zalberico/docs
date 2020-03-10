@@ -275,14 +275,18 @@ is time for Behn to wake up. It is also called by Behn to emit an error message.
 Upon receiving this `task`, Behn processes the elapsed timer and then sets
 `:next-wake`.
 
+`%wake` is also a `gift` that Behn can `%give`.
+
 #### Accepts
+
+As a `task`, `%wake` takes in `~`.
+
+As a `gift`, `%wake` may include an error message.
 
 ```hoon
 error=(unit tang)
 ```
 
-`%wake` is also used by Behn to emit error messages (why?) and so may have a
-`tang` as an input.
 
 #### Returns
 
