@@ -105,12 +105,41 @@ $blew  (send %rez p.p.kyz q.p.kyz)
 
 ### `%crud`
 
+This `task` is used by Dill to produce error reports.
+
 #### Accepts
+
+```hoon
+[err=@tas tac=(list tank)]
+```
+
+`err` is the type of error and `tac` is the associated error message.
 
 #### Returns
 
 #### Source
 
+```hoon
+      ++  crud
+        |=  {err/@tas tac/(list tank)}
+        ::  unknown errors default to %loud
+        ::
+        =/  lev=log-level  (~(gut by veb.all) err %loud)
+        ::  apply log level for this error tag
+        ::
+        =/  =wall
+          ?-  lev
+            %hush  ~
+            %soft  ~["crud: %{(trip err)} event failed"]
+            %loud  :-  "crud: %{(trip err)} event failed"
+                   %-  zing
+                   %+  turn  (flop tac)
+                   |=(a=tank (~(win re a) [0 wid]))
+          ==
+        |-  ^+  +>.^$
+        ?~  wall  +>.^$
+        $(wall t.wall, +>.^$ (from %out (tuba i.wall)))
+```
 
 ### `%flog`
 
