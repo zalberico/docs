@@ -143,6 +143,10 @@ This `task` is used by Dill to produce error reports.
 
 ### `%flog`
 
+A `%flog` `task` is a wrapper over a `task` sent by another vane, such as a
+`%crud` `task` asking Dill to print an error message. Dill removes the wrapper
+and sends the bare `task` to itself over the default `duct`.
+
 #### Accepts
 
 #### Returns
