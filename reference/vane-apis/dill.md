@@ -77,11 +77,21 @@ $blew  (send %rez p.p.kyz q.p.kyz)
 
 ### `%boot`
 
-"Weird Dill boot"
+This `task` is used only once, when Arvo first enters the [adult
+stage](@/docs/tutorials/arvo/arvo.md#structural-interface-core). Dill is
+technically the first vane to be activated, via the `%boot` `task`, which then
+send Jael (considered the the "true" first vane) an `%init` `task`, which then goes on to
+call `%init` `task`s for other vanes (including Dill). 
 
 #### Accepts
 
+`%boot` takes an argument that is either `%dawn` or `%fake`. `%dawn` is the one
+used in any typical scenario and activates the ordinary vane initialization
+process outlined above, while `%fake` is a debugging tool.
+
 #### Returns
+
+`%boot` does not return a `gift`.
 
 #### Source
 
