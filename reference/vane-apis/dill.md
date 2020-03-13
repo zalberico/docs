@@ -115,7 +115,9 @@ process outlined above, while `%fake` is a debugging tool.
 
 ### `%crud`
 
-This `task` is used by Dill to produce error reports.
+This `task` is used by Dill to produce error reports. It prints the received
+error message(s) (a `(list tank)`) to the terminal. The level of detail of the
+error message is set by `$log-level`, which is either `%hush`, `%soft`, or `%loud`.
 
 #### Accepts
 
@@ -126,6 +128,8 @@ This `task` is used by Dill to produce error reports.
 `err` is the type of error and `tac` is the associated error message.
 
 #### Returns
+
+`%crud` does not return a `gift`. 
 
 #### Source
 
