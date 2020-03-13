@@ -236,9 +236,19 @@ and sends the bare `task` to itself over the default `duct`.
 
 ### `%init`
 
+This `task` is called only once, when Arvo first enters the [adult
+stage](@/docs/tutorials/arvo/arvo.md#structural-interface-core). It performs
+initial setup for Dill, such as setting the width of the console.
+
+Note that this is not actually the first `task` passed to Dill - see [%boot](#%boot).
+
 #### Accepts
 
+`%init` takes no arguments.
+
 #### Returns
+
+`%init` returns no `gift`s.
 
 #### Source
 
@@ -259,11 +269,30 @@ and sends the bare `task` to itself over the default `duct`.
 
 ### `%knob`
 
+`%knob` sets the verbosity level for each error tag.
+
 #### Accepts
+
+```hoon
+[tag=@tas level=log-level]
+```
+
+`tag` is the error tag. `level` is the verbosity, set to either `%hush`,
+`%soft`, or `%loud`.
 
 #### Returns
 
+`%knob` does not return a gift.
+
 #### Source
+
+```hoon
+  ::  %knob sets a verbosity level for an error tag
+  ::
+  ?:  ?=(%knob -.task)
+    =.  veb.all  (~(put by veb.all) tag.task level.task)
+    [~ ..^$]
+```
 
 
 ### `%lyra`
