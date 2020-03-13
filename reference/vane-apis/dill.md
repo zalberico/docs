@@ -157,13 +157,21 @@ error message is set by `$log-level`, which is either `%hush`, `%soft`, or `%lou
 
 ### `%flog`
 
-A `%flog` `task` is a wrapper over a `task` sent by another vane, such as a
-`%crud` `task` asking Dill to print an error message. Dill removes the wrapper
+A `%flog` `task` is a wrapper over a `task` sent by another vane. Dill removes the wrapper
 and sends the bare `task` to itself over the default `duct`.
 
 #### Accepts
 
+`%flog` `task`s can take any valid Dill `task` as an argument.
+
 #### Returns
+
+`%flog` never returns a `gift` on its own, but the wrapped `task` might.
+
+#### Examples
+
+`%crud` `task`s from other vanes are typically passed to Dill wrapped in a
+`%flog` `task` to print errors to the terminal.
 
 #### Source
 
