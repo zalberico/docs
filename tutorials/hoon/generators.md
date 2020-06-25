@@ -308,7 +308,7 @@ typical desired operation of an `%ask` generator.
 Since this isn't easy to digest in the abstract, we'll use an example generator
 to explain how this kind of generator works.
 
-##### `%ask` example
+##### `%ask` example {#ask}
 
 The code below is an `%ask` generator that checks if the user inputs "blue" when
 prompted. Save it as `axe.hoon` in `/gen`.
