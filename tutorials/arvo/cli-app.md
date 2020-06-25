@@ -116,3 +116,9 @@ In English, this represents the following sequence of `move`s:
 This exercise has shown us how keyboard input in `%chat-cli` goes from Unix to Dill to
 Gall to `%hood`. In the next section we will see what is going on with `%hood`,
 `drum`, `shoe`, and `sole`.
+
+#### The guts of `%chat-cli`
+
+We will now investigate what happens when Gall `%deal`s `%chat-cli` a `%poke`
+containing the letter `a`. Namely, where does this end up getting stored and
+what libraries are being used here.
