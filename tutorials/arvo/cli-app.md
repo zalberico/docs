@@ -82,54 +82,10 @@ functionality than `shoe`. It is still appropriate to use for writing generators
 that handle user input, but anything more complex should use `shoe`, which does
 the messier low-level work with `sole` on your behalf.
 
-### How they work together
+## How they work together
 
 Here we give an overview of how the above components work together as a whole to
 implement CLI functionality.
-
-#### Sending a single character
-
-Let's first look at a move trace of what happens when a single character is
-pressed on the keyboard. For a more in-depth explanation of what this means, check out
-the [move trace tutorial](@/docs/tutorials/arvo/move-trace.md).
-
-Starting from dojo, we enable verbose mode by entering `|verb` and then
-switching to `%chat-cli` with `Ctrl-X`. Then we press a
-single character, say `a`. The following move trace shows how that `a` ends up
-being displayed on the screen and passed to `%chat-cli` for further handling.
-
-```
-["" %unix %belt //term/1 ~2020.6.25..18.27.29..cbd5]
-["|" %pass [%d %g] [[%deal [~zod ~zod] %hood %poke] /] ~[//term/1]]
-["||" %give %g [%unto %fact] i=/d t=~[//term/1]]
-["||" %pass [%g %g] [[%deal [~zod ~zod] %chat-cli %poke] /use/hood/~zod/out/~zod/chat-cli/drum/phat/~zod/chat-cli] ~[/d //term/1]]
-```
-We've omitted two `%poke-ack`s for clarity here, as they are a distraction from our discussion.
-
-In English, this represents the following sequence of `move`s:
-
-1. Unix sends `%belt` `card` to Arvo, which then triggers the `%belt` `task` in
-   Dill. This is the `task` that Dill uses to receive input from the keyboard.
-2. Dill `%pass`es the input to Gall, which `%poke`s the `%hood` app, telling
-   `%hood` that the `a` key was pressed.
-3. Gall `%give`s back to Dill a `%fact`, telling it to display the key that was
-   pressed `a` in the terminal.
-4. Gall `%pass`es to itself, `%poke`ing `%chat-cli` to inform it that `a` has been
-   pressed. This `%poke` to `%chat-cli` is along the `duct`
-   `/use/hood/~zod/out/~zod/chat-cli/drum/phat/~zod/chat-cli]` which tells us that...
-   `chat-cli` utilizes hood and drum somehow? I'm not sure what exactly occurs here.
-   
-This exercise has shown us how keyboard input in `%chat-cli` goes from Unix to Dill to
-Gall to `%hood`. In the next section we will see what is going on with `%hood`,
-`drum`, `shoe`, and `sole`.
-
-### The guts of `%chat-cli`
-
-We will now investigate what happens when Gall `%deal`s `%chat-cli` a `%poke`
-containing the letter `a`. Namely, where does this end up getting stored and
-what libraries are being used here.
-
-### The guts of `/app/shoe.hoon`
 
 
 ### The `shoe` library
@@ -236,7 +192,7 @@ modify the app.
 `/+` is the Ford rune wihich imports libraries from the `/lib` directory into
 the subject.
  * `shoe` is the `shoe` library.
- * `verb` is...
+ * `verb` is a library used to print what a Gall agent is doing.
  * `dbug` is a library of debugging tools. Why do we need this?
  * `default-agent` contains a Gall agent core with minimal implementations of
    required Gall arms.
@@ -277,16 +233,37 @@ reference `card:shoe` because of `/+  shoe` at the beginning of the app.
 =|  state-0
 =*  state  -
 ::
+```
+Pin the bunt value of `state-0` to the head of the subject, then give it the
+macro `state`. The `-` here is a lark expression referring to the head of the
+subject. This allows us to use `state` to refer to the state elsewhere in the
+code no matter what version we're using.
+
+```hoon
 %+  verb  |
 %-  agent:dbug
 ^-  agent:gall
 %-  (agent:shoe command)
 ^-  (shoe:shoe command)
+```
+This sequence of commands tells the compiler that the following core is a Gall
+agent core that may possess arms of the sort defined in `verb,` `agent:dbug`,
+and `agent:shoe`. These cores tell the compiler what sort of form these arms
+must have, and ensure that the arms that are not standard Gall arms are put into
+the context so that the resulting core nests within `agent:gall`.
+
+```hoon
 |_  =bowl:gall
 +*  this  .
     def   ~(. (default-agent this %|) bowl)
     des   ~(. (default:shoe this command) bowl)
 ::
+```
+This is boilerplate Gall agent core code. `def` refers to the part of the
+context where the `default-agent` lives, while `des` refers to the part of the
+context where `shoe` library commands live.
+
+```hoon
 ++  on-init   on-init:def
 ++  on-save   !>(state)
 ++  on-load
@@ -302,6 +279,10 @@ reference `card:shoe` because of `/+  shoe` at the beginning of the app.
 ++  on-arvo   on-arvo:def
 ++  on-fail   on-fail:def
 ::
+```
+Boilerplate Gall app arms.
+
+```hoon
 ++  command-parser
   |=  sole-id=@ta
   ^+  |~(nail *(like [? command]))
@@ -333,6 +314,74 @@ reference `card:shoe` because of `/+  shoe` at the beginning of the app.
 ++  on-disconnect   on-disconnect:des
 --
 ```
+
+#### Move trace on example app
+
+In this section we will track how our input commands propagate through Arvo.
+
+Let's first look at a move trace of what happens when a single character is
+pressed on the keyboard when running the `%shoe` app. For a more in-depth
+explanation of how to interpret move traces, check out
+the [move trace tutorial](@/docs/tutorials/arvo/move-trace.md).
+
+Starting from dojo, we enable verbose mode by entering `|verb` and then
+switch to `%shoe` with `Ctrl-X` (you may need to press `Ctrl-X` multiple times). Then we press a
+single character, say `d`, as if we are beginning to input the only command
+`%shoe` accepts, `demo`. The following move trace shows how that `d` ends up
+being displayed on the screen and passed to `%shoe` for further handling.
+
+```
+["" %unix %belt //term/1 ~2020.7.9..20.24.51..81e5]
+["|" %pass [%d %g] [[%deal [~zod ~zod] %hood %poke] /] ~[//term/1]]
+["||" %give %g [%unto %fact] i=/d t=~[//term/1]]
+["||" %pass [%g %g] [[%deal [~zod ~zod] %shoe %poke] /use/hood/~zod/out/~zod/shoe/drum/phat/~zod/shoe] ~[/d //term/1]]
+```
+
+We've omitted two `%poke-ack`s for clarity here, as they are a distraction from our discussion.
+
+In English, this represents the following sequence of `move`s:
+
+1. Unix sends `%belt` `card` to Arvo, which then triggers the `%belt` `task` in
+   Dill. This is the `task` that Dill uses to receive input from the keyboard.
+2. Dill `%pass`es the input to Gall, which `%poke`s the `%hood` app, telling
+   `%hood` that the `d` key was pressed.
+3. Gall `%give`s back to Dill a `%fact`, telling it to display the key that was
+   pressed, `d`, in the terminal.
+4. Gall `%pass`es a `%deal` `card`  to itself, which says to `%poke` `%shoe` to inform it that `d` has been
+   pressed. This `%poke` to `%shoe` is along the `wire`
+   `/use/hood/~zod/out/~zod/shoe/drum/phat/~zod/shoe` which tells us that
+   `%hood`, `drum`, and `phat` (another part of `%hood`) are all involved in some way. However this `wire`
+   is generally thought of as being a unique identifier for an opaque cause and
+   so exactly what it says doesn't actually tell us very much.
+   
+This exercise has shown us how keyboard input goes from Unix to Dill to
+Gall to `%hood` to `%shoe`. Let's input the rest of the characters so that
+`demo` is displayed in the command line, then press Enter.
+
+```
+["" %unix %belt //term/1 ~2020.7.9..20.24.31..7117]
+["|" %pass [%d %g] [[%deal [~zod ~zod] %hood %poke] /] ~[//term/1]]
+["||" %pass [%g %g] [[%deal [~zod ~zod] %shoe %poke] /use/hood/~zod/out/~zod/shoe/drum/phat/~zod/shoe] ~[/d //term/1]]
+["|||" %give %g [%unto %fact] i=/g/use/hood/~zod/out/~zod/shoe/drum/phat/~zod/shoe t=~[/d //term/1]]
+["||||" %give %g [%unto %fact] i=/d t=~[//term/1]]
+["|||" %give %g [%unto %fact] i=/g/use/hood/~zod/out/~zod/shoe/drum/phat/~zod/shoe t=~[/d //term/1]]
+["||||" %give %g [%unto %fact] i=/d t=~[//term/1]]
+~zod ran the command
+```
+Again, we omit the `%poke-ack`s. The first two `move`s are doing the same as
+before. Things start to diverge at the third `move`. Here, we no longer return
+to Dill to instruct it to display a character since Enter is not a visible
+character. Instead we go straight to `%poke`ing `%shoe`, telling it that Enter
+has been pressed.
+
+My guess for remaining moves:
+
+4. `%shoe` parses the poke and recognizes it as a valid command. It then
+   tells Gall to tell Dill the start a new line.
+5. Gall tells Dill to display a new line.
+6. `%shoe` processes the validated command and tells Gall to tell Dill to
+   display `~zod ran the command`.
+7. Gall tells Dill to display `~zod ran the command`.
 
 ### Example app idea
 
