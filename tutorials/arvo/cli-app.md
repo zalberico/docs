@@ -101,19 +101,23 @@ ship and which session on that ship if there are multiple.
 
 #### `shoe` core
 
-A Gall agent core with extra arms for working with the `shoe` library. Use this
-core whenever you want to receive input and run a command. The input will get
+An iron (contravariant) door that defines an interface for Gall agents utilized
+the `shoe` library. Use this
+core whenever you want to receive input from the user and run a command. The input will get
 put through the parser (`+command-parser`) and results in a noun of
 `command-type` that the underlying application specifies, then the app calls
 that command.
 
 In addition to the ten arms that all Gall core apps possess, `+shoe` has a few
-more.
+more specific to making use of the `shoe` library. Thus you will often find it
+convenient to wrap the `shoe` core with the `agent` core to obain a standard
+10-arm Gall agent core. See the [shoe example app
+walkthrough](#shoe-example-app-walkthrough) for how to do this.
 
 ##### `+command-parser`
 
 Input parser for a specific session. If the head of the result is true,
-instantly run the command.
+instantly run the command. We give a brief tutorial on parsing in SECTION??
 
 ##### `+tab-list`
 
@@ -138,13 +142,16 @@ Called when a session is disconnected.
 
 #### `default` core
 
-This core contains the bare minimum implementation of shoe arms. It is used
+This core contains the bare minimum implementation of the additional `shoe` arms
+beyond the 10 standard Gall app ams. It is used
 analogously to how the `default-agent` core is used for Gall apps.
 
 #### `agent` core
 
-This is a wrapper core that takes in the specialized `shoe` core and turns it
-into a standard Gall agent core.
+This is a wrapper core designed to take in the `shoe` core that has too many
+arms to be a Gall agent core, and turns it into a standard Gall agent core by
+moving the additional arms into the context. It endows the agent with additonal
+arms in its context used for managing `sole` events and for calling `shoe`-specific arms.
 
 
 ### The `sole` library
@@ -189,7 +196,7 @@ modify the app.
 /+  shoe, verb, dbug, default-agent
 ```
 
-`/+` is the Ford rune wihich imports libraries from the `/lib` directory into
+`/+` is the Ford rune which imports libraries from the `/lib` directory into
 the subject.
  * `shoe` is the `shoe` library.
  * `verb` is a library used to print what a Gall agent is doing.
@@ -246,11 +253,21 @@ code no matter what version we're using.
 %-  (agent:shoe command)
 ^-  (shoe:shoe command)
 ```
+This sequence of commands forges a `agent:gall` core that
+possess may arms of the sort defined in `verb,` `agent:dbug`, and `agent:shoe`.
 This sequence of commands tells the compiler that the following core is a Gall
-agent core that may possess arms of the sort defined in `verb,` `agent:dbug`,
+agent core that may possess arms of the sort defined in `verb`, `agent:dbug`,
 and `agent:shoe`. These cores tell the compiler what sort of form these arms
 must have, and ensure that the arms that are not standard Gall arms are put into
 the context so that the resulting core nests within `agent:gall`.
+
+To be more precise, going from bottom to top, we cast what follows to a
+`(shoe:shoe command)` app core,
+pass that into a gate that transforms it into a `(agent:shoe command)` core, which is then cast
+as an `agent:gall` and passed into the `agent:dbug` gate, which
+endows the resulting core (stil a valid Gall agent core) with additional arms
+useful for debugging purposes. Finally, the `verb` gate (imported with `/+
+verb`) is called, which allows the agent to print what it is doing.
 
 ```hoon
 |_  =bowl:gall
@@ -259,9 +276,11 @@ the context so that the resulting core nests within `agent:gall`.
     des   ~(. (default:shoe this command) bowl)
 ::
 ```
-This is boilerplate Gall agent core code. `def` refers to the part of the
-context where the `default-agent` lives, while `des` refers to the part of the
+This is boilerplate Gall agent core code. We set `def` to be an alias for the part of the
+context where the `default-agent` lives, and set `des`  to be an alias for the part of the
 context where `shoe` library commands live.
+
+Next we begin implementing all of the arms 
 
 ```hoon
 ++  on-init   on-init:def
@@ -280,14 +299,51 @@ context where `shoe` library commands live.
 ++  on-fail   on-fail:def
 ::
 ```
-Boilerplate Gall app arms.
+Boilerplate Gall app arms using the minimum implementation found in `def`.
 
+Here begins the implementations of the additional arms required by the
+`(shoe:shoe command)` interface.
 ```hoon
 ++  command-parser
   |=  sole-id=@ta
   ^+  |~(nail *(like [? command]))
   (cold [& ~] (jest 'demo'))
 ::
+```
+`+command-parser` is of central importance - it is what is used to parse user
+input and transform it into `$command`s for the app to execute. Writing a proper
+command parser requires understanding of the Hoon parsing functions found in the
+standard library, but we will cover some of the basics here.
+
+`+command-parser` is a gate which takes in a `sole-id=@ta`, reads the input
+somehow, and parses it and chooses to activate a gate somehow.
+
+
+with 
+`^+  |~(nail *(like [? command]))`. The `sole-id` is used to identify which session
+to check user input for. `|~(nail *(like [? command]))` is an iron gate which
+takes a `nail` (parse input) and returns an `edge` (parse output). A `nail` is
+the remainder of a parse given by `[p=hair q=tape]` where the
+`hair=[p=@ud q=@ud]` represent line and column of the current position of the parse and the
+`tape` is the parsing input. An `edge` is a given by `[p=hair q=(unit
+[p=* q=nail])]` which continues tracking the current parsing position and may
+return a `~` signifying that nothing has been recognized, or a
+noun (like a parsed command) and a `nail` representing the parse input. Here the
+`edge` is given by the product of `*(like [? command])`, which is the bunt value
+of the type of `edge`s which may return `?` and `command`.
+
+So by the time we get to `+command-parser` we already have a nail. Where do the
+nails come from?
+
+Anyways, the gate is
+
+```hoon
+(cold [& ~] (jest 'demo'))
+```
+`cold` is a parser building, and `cold [& ~]` is then an `edge` that
+returns either an `&` or ...
+
+```hoon
 ++  tab-list
   |=  sole-id=@ta
   ^-  (list [@t tank])
